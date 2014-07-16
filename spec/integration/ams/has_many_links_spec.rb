@@ -108,67 +108,69 @@ describe "AMS load has_many linked records" do
     end
   end
 
-  #context "that are not loaded" do
-    #before(:each) do
-      #person_response = {
-        #person: {
-          #id: 123,
-          #firstname: "ryan",
-          #links: {
-            ## use a strange url
-            #items: "/testing/items?p_id=123"
-          #}
-        #}
-      #}.to_json
+  context "that are not loaded" do
+    # this tests Person.new(id: 123).items will load the person
+    # then load the items
 
-      #items_response = {
-        #items: [{
-          #id: 1,
-          #name: "first"
-        #}, {
-          #id: 2,
-          #name: "second"
-        #}]
-      #}
+    before(:each) do
+      person_response = {
+        person: {
+          id: 123,
+          firstname: "ryan",
+          links: {
+            # use a strange url
+            items: "/testing/items?p_id=123"
+          }
+        }
+      }.to_json
 
-      #stub_request(:get, "http://www.example.com/people/123")
-        #.to_return(
-          #status: 200,
-          #body: person_response,
-        #)
+      items_response = {
+        items: [{
+          id: 1,
+          name: "first"
+        }, {
+          id: 2,
+          name: "second"
+        }]
+      }.to_json
 
-      #stub_request(:get, "http://www.example.com/testing/items?p_id=123")
-        #.to_return(
-          #status: 200,
-          #body: items_response,
-        #)
-    #end
+      stub_request(:get, "http://www.example.com/people/123")
+        .to_return(
+          status: 200,
+          body: person_response,
+        )
 
-    #let(:person) { Person.new(id: 123) }
-    #let(:items) { person.items }
+      stub_request(:get, "http://www.example.com/testing/items?p_id=123")
+        .to_return(
+          status: 200,
+          body: items_response,
+        )
+    end
 
-    #context "the person" do
-      #subject { person }
+    let(:person) { Person.new(id: 123) }
+    let(:items) { person.items }
 
-      #before(:each) do
-        ## load items (which should load person)
-        #person.items
-      #end
+    context "the person" do
+      subject { person }
 
-      #its(:id) { should eq(123) }
-      #its(:firstname) { should eq('ryan') }
-    #end
+      before(:each) do
+        # load items (which should load person)
+        person.items
+      end
 
-    #context "the items" do
-      #subject { items }
+      its(:id) { should eq(123) }
+      its(:firstname) { should eq('ryan') }
+    end
 
-      #it { should have(2).items }
+    context "the items" do
+      subject { items }
+      it { should have(2).items }
 
-      #context "the first item" do
-        #subject { items[0] }
-        #its(:name) { should eq('first') }
-        #its(:id) { should eq(1) }
-      #end
-    #end
-  #end
+      context "the first item" do
+        subject { items[0] }
+        its(:name) { should eq('first') }
+        its(:id) { should eq(1) }
+      end
+    end
+  end
 end

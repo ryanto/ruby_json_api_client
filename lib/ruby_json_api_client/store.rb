@@ -110,10 +110,7 @@ module RubyJsonApiClient
 
       # ensure parent is loaded
       if parent.__origin__.nil?
-        # load this result into parent
-        # need ability to hydrate
-        parent.reload
-        find(parent.class, parent.id)
+        reload(parent)
       end
 
       response = parent.__origin__
@@ -155,7 +152,9 @@ module RubyJsonApiClient
     end
 
     def merge(into, from)
-      # i think the serializer should deceide how to merge
+      into.__origin__ = from.__origin__
+      into.meta = from.meta
+
       from.class.fields.reduce(into) do |model, attr|
         call = "#{attr}="
         model.send(call, from.send(attr)) if model.respond_to?(call)

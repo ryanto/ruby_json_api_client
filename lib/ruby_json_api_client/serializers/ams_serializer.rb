@@ -48,6 +48,7 @@ module RubyJsonApiClient
     def extract_many(klass, response)
       name = klass.to_s.underscore
       plural = ActiveSupport::Inflector.pluralize(name)
+
       data = transform(response)
 
       assert data[plural],
