@@ -138,6 +138,12 @@ describe RubyJsonApiClient::AmsSerializer do
         .with(person, :items, response)
         .and_return([])
 
+      person.meta = {
+        data: {
+          'item_ids' => [1]
+        }
+      }
+
       serializer.extract_many_relationship(
         person,
         :items,
@@ -180,7 +186,13 @@ describe RubyJsonApiClient::AmsSerializer do
   end
 
   describe :extract_many_relationship_from_sideload do
-    let(:person) { Person.new }
+    let(:person) do
+      Person.new(meta: {
+        data: {
+          "item_ids" => [2]
+        }
+      })
+    end
 
     let(:response) do
       {
@@ -200,11 +212,11 @@ describe RubyJsonApiClient::AmsSerializer do
         .with(Item, response)
         .and_return([])
 
-      serializer.extract_relationship_from_sideload(person, :items, response)
+      serializer.extract_many_relationship_from_sideload(person, :items, response)
     end
 
     it "should filter the ids in the relationship" do
-      result = serializer.extract_relationship_from_sideload(person, :items, response)
+      result = serializer.extract_many_relationship_from_sideload(person, :items, response)
 
       expect(result).to have(1).items
       expect(result.first.id).to eq(2)

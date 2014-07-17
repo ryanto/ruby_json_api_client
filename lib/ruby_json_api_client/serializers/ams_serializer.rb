@@ -16,6 +16,8 @@ module RubyJsonApiClient
     def _create_model(klass, data)
       model = klass.new(meta: {})
 
+      model.meta[:data] = data
+
       if data['links']
         model.meta[:links] = data['links']
       end
@@ -69,14 +71,14 @@ module RubyJsonApiClient
       # 2) in sideloaded data
       data = transform(response)
       singular = ActiveSupport::Inflector.singularize(name)
-      parent_name = parent.class.name.to_s.downcase
       meta = parent.meta || {}
-      links = meta[:links]
+      meta_links = meta[:links]
+      meta_data = meta[:data]
 
-      if links && links[name.to_s]
-        extract_many_relationship_from_links(parent, name, links[name.to_s])
+      if meta_links && meta_links[name.to_s]
+        extract_many_relationship_from_links(parent, name, meta_links[name.to_s])
 
-      elsif data[name.to_s] && data[parent_name]["#{singular}_ids"]
+      elsif data[name.to_s] && meta_data && meta_data["#{singular}_ids"]
         extract_many_relationship_from_sideload(parent, name, response)
 
       else
@@ -95,14 +97,13 @@ module RubyJsonApiClient
       store.load_collection(klass, url)
     end
 
-    def extract_relationship_from_sideload(parent, name, response)
-      data = transform(response)
+    def extract_many_relationship_from_sideload(parent, name, response)
       singular = ActiveSupport::Inflector.singularize(name)
-      parent_name = parent.class.name.to_s.downcase
       klass_name = ActiveSupport::Inflector.classify(name)
       klass = ActiveSupport::Inflector.constantize(klass_name)
+      meta_data = parent.meta[:data]
 
-      ids = data[parent_name]["#{singular}_ids"]
+      ids = meta_data["#{singular}_ids"]
       idMap = ids.reduce({}) do |map, id|
         map[id] = true
         map
