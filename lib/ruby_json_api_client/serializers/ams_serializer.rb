@@ -47,9 +47,9 @@ module RubyJsonApiClient
       _create_model(klass, data[name])
     end
 
-    def extract_many(klass, response)
-      name = klass.to_s.underscore
-      plural = ActiveSupport::Inflector.pluralize(name)
+    def extract_many(klass, response, key = nil)
+      key = klass.to_s.underscore if key.nil?
+      plural = ActiveSupport::Inflector.pluralize(key)
 
       data = transform(response)
 
@@ -64,7 +64,7 @@ module RubyJsonApiClient
       end
     end
 
-    def extract_many_relationship(parent, name, response)
+    def extract_many_relationship(parent, name, options, response)
       # given response this will find the relationship
       # for ams based apis the relationship will either be
       # 1) in links
@@ -76,10 +76,10 @@ module RubyJsonApiClient
       meta_data = meta[:data]
 
       if meta_links && meta_links[name.to_s]
-        extract_many_relationship_from_links(parent, name, meta_links[name.to_s])
+        extract_many_relationship_from_links(parent, name, options, meta_links[name.to_s])
 
       elsif data[name.to_s] && meta_data && meta_data["#{singular}_ids"]
-        extract_many_relationship_from_sideload(parent, name, response)
+        extract_many_relationship_from_sideload(parent, name, options, response)
 
       else
         []
@@ -87,19 +87,20 @@ module RubyJsonApiClient
       end
     end
 
-    def extract_many_relationship_from_links(parent, name, url)
+    def extract_many_relationship_from_links(parent, name, options, url)
       # since we only have a url pointing to where to pull
       # this info from we need to go back to the store and
       # have it pull this data
-      klass_name = ActiveSupport::Inflector.classify(name)
+      klass_name = options[:class_name] || ActiveSupport::Inflector.classify(name)
       klass = ActiveSupport::Inflector.constantize(klass_name)
 
       store.load_collection(klass, url)
     end
 
-    def extract_many_relationship_from_sideload(parent, name, response)
+    def extract_many_relationship_from_sideload(parent, name, options, response)
       singular = ActiveSupport::Inflector.singularize(name)
-      klass_name = ActiveSupport::Inflector.classify(name)
+      plural = ActiveSupport::Inflector.pluralize(name)
+      klass_name = options[:class_name] || ActiveSupport::Inflector.classify(name)
       klass = ActiveSupport::Inflector.constantize(klass_name)
       meta_data = parent.meta[:data]
 
@@ -109,7 +110,7 @@ module RubyJsonApiClient
         map
       end
 
-      extract_many(klass, response)
+      extract_many(klass, response, plural)
         .select { |record| idMap[record.id] }
     end
   end

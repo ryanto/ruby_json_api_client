@@ -17,6 +17,7 @@ describe "AMS load has_many sideloaded records" do
     field :lastname
 
     has_many :items
+    has_many :other_items, class_name: 'Item'
 
     def full_name
       "#{firstname} #{lastname}"
@@ -144,4 +145,42 @@ describe "AMS load has_many sideloaded records" do
       end
     end
   end
+
+  context "using a different relationship class name" do
+    before(:each) do
+      response = {
+        person: {
+          id: 123,
+          firstname: "ryan",
+          other_item_ids: [1, 2]
+        },
+        other_items: [{
+          id: 1,
+          name: "first"
+        },{
+          id: 2,
+          name: "second"
+        }]
+      }.to_json
+
+      stub_request(:get, "http://www.example.com/people/123")
+        .to_return(
+          status: 200,
+          body: response,
+        )
+    end
+
+    let(:person) { Person.new(id: 123) }
+    let(:other_items) { person.other_items }
+
+    subject { other_items }
+    it { should have(2).items }
+
+    context "the first item" do
+      subject { other_items[0] }
+      its(:name) { should eq('first') }
+      its(:id) { should eq(1) }
+    end
+  end
+
 end

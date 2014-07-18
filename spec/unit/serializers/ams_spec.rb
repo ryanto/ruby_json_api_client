@@ -106,15 +106,37 @@ describe RubyJsonApiClient::AmsSerializer do
         end
       end
     end
+
+    context "using a different key name" do
+      let(:json) do
+        {
+          peeps: [{
+            id: 1,
+            firstname: 'ryan'
+          }]
+        }.to_json
+      end
+
+      let(:collection) { serializer.extract_many(Person, json, "peeps") }
+
+      subject { collection }
+      it { should have(1).items }
+
+      context "the person" do
+        subject { collection.first }
+        it { should be_instance_of(Person) }
+        it { should respond_to(:firstname) }
+        its(:firstname) { should eq('ryan') }
+      end
+    end
   end
 
   describe :extract_many_relationship do
-
     let(:person) { Person.new }
 
     it "should extact relationships using links" do
       expect(serializer).to receive(:extract_many_relationship_from_links)
-        .with(person, :items, "http://items.test")
+        .with(person, :items, {}, "http://items.test")
         .and_return([])
 
       person.meta = {
@@ -126,6 +148,7 @@ describe RubyJsonApiClient::AmsSerializer do
       serializer.extract_many_relationship(
         person,
         :items,
+        {},
         "{}"
       )
     end
@@ -135,7 +158,7 @@ describe RubyJsonApiClient::AmsSerializer do
       response = "{ \"person\": { \"item_ids\": [1] }, \"items\": #{items} }"
 
       expect(serializer).to receive(:extract_many_relationship_from_sideload)
-        .with(person, :items, response)
+        .with(person, :items, {}, response)
         .and_return([])
 
       person.meta = {
@@ -147,6 +170,7 @@ describe RubyJsonApiClient::AmsSerializer do
       serializer.extract_many_relationship(
         person,
         :items,
+        {},
         response
       )
     end
@@ -155,6 +179,7 @@ describe RubyJsonApiClient::AmsSerializer do
       result = serializer.extract_many_relationship(
         person,
         :items,
+        {},
         "{ \"person\": { }, \"items\": [{\"id\": 1 }] }"
       )
 
@@ -162,24 +187,42 @@ describe RubyJsonApiClient::AmsSerializer do
     end
 
     it "should give an empty collection when there is no sideload or links present" do
-      result = serializer.extract_many_relationship(person, :items, "{ \"person\": { } }")
+      result = serializer.extract_many_relationship(
+        person,
+        :items,
+        {},
+        "{ \"person\": { } }"
+      )
+
       expect(result).to match_array([])
     end
   end
 
   describe :extract_many_relationship_from_links do
     let(:person) { Person.new }
+    let(:store) { double("store") }
 
-    it "should have the store load the collection" do
-      store = double("store")
+    before(:each) do
       serializer.store = store
 
       expect(store).to receive(:load_collection)
         .with(Item, "http://www.example.com/items")
+    end
 
+    it "should have the store load the collection" do
       serializer.extract_many_relationship_from_links(
         person,
         :items,
+        {},
+        "http://www.example.com/items"
+      )
+    end
+
+    it "should have the store load the collection for the given class" do
+      serializer.extract_many_relationship_from_links(
+        person,
+        :oddly_named_items,
+        { class_name: 'Item' },
         "http://www.example.com/items"
       )
     end
@@ -209,14 +252,37 @@ describe RubyJsonApiClient::AmsSerializer do
 
     it "should use extract many to pull the data" do
       expect(serializer).to receive(:extract_many)
-        .with(Item, response)
+        .with(Item, response, "items")
         .and_return([])
 
-      serializer.extract_many_relationship_from_sideload(person, :items, response)
+      serializer.extract_many_relationship_from_sideload(
+        person,
+        :items,
+        {},
+        response
+      )
+    end
+
+    it "should pass the right class name to extract many" do
+      expect(serializer).to receive(:extract_many)
+        .with(CellPhone, response, "items")
+        .and_return([])
+
+      serializer.extract_many_relationship_from_sideload(
+        person,
+        :items,
+        { class_name: 'CellPhone' },
+        response
+      )
     end
 
     it "should filter the ids in the relationship" do
-      result = serializer.extract_many_relationship_from_sideload(person, :items, response)
+      result = serializer.extract_many_relationship_from_sideload(
+        person,
+        :items,
+        {},
+        response
+      )
 
       expect(result).to have(1).items
       expect(result.first.id).to eq(2)

@@ -34,10 +34,12 @@ module RubyJsonApiClient
 
     end
 
-    def self.has_many(name)
+    def self.has_many(name, options = {})
       define_method(name) do
         # make cachable
-        RubyJsonApiClient::Store.instance.find_many_relationship(self, name)
+        RubyJsonApiClient::Store
+          .instance
+          .find_many_relationship(self, name, options)
       end
     end
 

@@ -104,7 +104,7 @@ module RubyJsonApiClient
       collection
     end
 
-    def find_many_relationship(parent, name)
+    def find_many_relationship(parent, name, options)
       # needs to use adapter_for_class
       serializer = @default_serializer
 
@@ -116,7 +116,7 @@ module RubyJsonApiClient
       response = parent.__origin__
 
       # find the relationship
-      list = serializer.extract_many_relationship(parent, name, response)
+      list = serializer.extract_many_relationship(parent, name, options, response)
 
       # wrap in enumerable proxy to allow reloading
       collection = RubyJsonApiClient::Collection.new(list)
