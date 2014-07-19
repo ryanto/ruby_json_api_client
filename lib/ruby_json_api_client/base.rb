@@ -43,6 +43,15 @@ module RubyJsonApiClient
       end
     end
 
+    def self.has_one(name, options = {})
+      define_method(name) do
+        # make cachable
+        RubyJsonApiClient::Store
+          .instance
+          .find_single_relationship(self, name, options)
+      end
+    end
+
     def self.find(id)
       RubyJsonApiClient::Store.instance.find(self, id)
     end

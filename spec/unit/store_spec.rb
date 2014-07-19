@@ -190,7 +190,24 @@ describe RubyJsonApiClient::Store do
   end
 
   describe :load_single do
+    before(:each) do
+      RubyJsonApiClient::Store.register_adapter(:json_api)
+      RubyJsonApiClient::Store.register_serializer(:json_api)
+    end
 
+    let(:serializer) { store.default_serializer }
+    let(:adapter) { store.default_adapter }
+
+    it "should use the adapter and serializer to load the model" do
+      expect(adapter).to receive(:get)
+        .with("http://example.com/testings/1")
+        .and_return("{}")
+
+      expect(serializer).to receive(:extract_single)
+        .with(Person, 1, "{}")
+
+      store.load_single(Person, 1, "http://example.com/testings/1")
+    end
   end
 
   describe :reload do

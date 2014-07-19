@@ -288,4 +288,160 @@ describe RubyJsonApiClient::AmsSerializer do
       expect(result.first.id).to eq(2)
     end
   end
+
+  describe :extract_single_relationship do
+    let(:person) { Person.new }
+    let(:item) { Item.new }
+    let(:response) { "{}" } # dummy response
+    subject { serializer.extract_single_relationship(person, :item, {}, response) }
+
+    context "from links" do
+      let(:person) do
+        Person.new(meta: { links: {
+          'item' => 'http://example.com/item/1'
+        }})
+      end
+
+      before(:each) do
+        expect(serializer).to receive(:extract_single_relationship_from_links)
+          .with(person, :item, {}, "http://example.com/item/1")
+          .and_return(item)
+      end
+
+      it { should eq(item) }
+    end
+
+    context "from sideload" do
+      let(:person) do
+        Person.new(meta: { data: {
+          'item_id' => 1
+        }})
+      end
+
+      let(:response) do
+        # for sideloader
+        {
+          items: [{
+            id: 1,
+          }]
+        }.to_json
+      end
+
+      before(:each) do
+        expect(serializer).to receive(:extract_single_relationship_from_sideload)
+          .with(person, :item, {}, response)
+          .and_return(item)
+      end
+
+      it { should eq(item) }
+    end
+
+    context "when nothing is found" do
+      it { should be_nil }
+    end
+  end
+
+  describe :extract_single_relationship_from_links do
+    let(:store) { double("store") }
+    let(:person) { Person.new }
+    let(:item) { Item.new }
+
+    before(:each) do
+      serializer.store = store
+
+      expect(store).to receive(:load_single)
+        .with(Item, nil, "http://example.com/items/1")
+        .and_return(item)
+    end
+
+    context "with no options" do
+      subject do
+        serializer.extract_single_relationship_from_links(
+          person, :item, {}, "http://example.com/items/1"
+        )
+      end
+
+      it { should eq(item) }
+    end
+
+    context "with a different class name" do
+      subject do
+        serializer.extract_single_relationship_from_links(
+          person, :favorite_item, { class_name: 'Item' }, "http://example.com/items/1"
+        )
+      end
+
+      it { should eq(item) }
+    end
+  end
+
+  describe :extract_single_relationship_from_sideload do
+    context "with no options" do
+      let(:person) do
+        Person.new(meta: { data: {
+          'item_id' => 2
+        }})
+      end
+
+      subject do
+        serializer.extract_single_relationship_from_sideload(
+          person, :item, {}, response
+        )
+      end
+
+      let(:response) do
+        {
+          person: {
+            id: 1,
+            item_id: 2
+          },
+          items: [{
+            id: 1,
+            name: 'not for person'
+          },{
+            id: 2,
+            name: 'persons item'
+          }]
+        }.to_json
+      end
+
+      it { should be_instance_of(Item) }
+      its(:id) { should eq(2) }
+      its(:name) { should eq('persons item') }
+    end
+
+    context "with a different class name" do
+      let(:person) do
+        Person.new(meta: { data: {
+          'favorite_item_id' => 2
+        }})
+      end
+
+      subject do
+        serializer.extract_single_relationship_from_sideload(
+          person, :favorite_item, { class_name: 'Item' }, response
+        )
+      end
+
+      let(:response) do
+        {
+          person: {
+            id: 1,
+            favorite_item_id: 2
+          },
+          favorite_items: [{
+            id: 1,
+            name: 'not for person'
+          },{
+            id: 2,
+            name: 'persons item'
+          }]
+        }.to_json
+      end
+
+      it { should be_instance_of(Item) }
+      its(:id) { should eq(2) }
+      its(:name) { should eq('persons item') }
+    end
+  end
 end

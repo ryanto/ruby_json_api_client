@@ -109,9 +109,7 @@ module RubyJsonApiClient
       serializer = @default_serializer
 
       # ensure parent is loaded
-      if parent.__origin__.nil?
-        reload(parent)
-      end
+      reload(parent) if parent.__origin__.nil?
 
       response = parent.__origin__
 
@@ -124,8 +122,15 @@ module RubyJsonApiClient
       collection
     end
 
-    def find_one_relationship(name, parent)
+    def find_single_relationship(parent, name, options)
+      # needs to use serializer_for_class
+      serializer = @default_serializer
 
+      reload(parent) if parent.__origin__.nil?
+
+      response = parent.__origin__
+
+      serializer.extract_single_relationship(parent, name, options, response)
     end
 
     def load_collection(klass, url)
@@ -135,11 +140,11 @@ module RubyJsonApiClient
       serializer.extract_many(klass, response)
     end
 
-    def load_single(klass, url)
+    def load_single(klass, id, url)
       adapter = adapter_for_class(klass)
       serializer = serializer_for_class(klass)
       response = adapter.get(url)
-      serializer.extract_single(response)
+      serializer.extract_single(klass, id, response)
     end
 
     def load(klass, data)

@@ -41,8 +41,12 @@ module RubyJsonApiClient
       assert data[name]['id'],
         "No id included in #{name} json data"
 
-      assert data[name]['id'].to_s == id.to_s,
-        "Tried to find #{name} with id #{id}, but got #{name} with id #{data[name]['id']}."
+      if id
+        # we will allow idless loading, but if an id is given we
+        # will try to verify it.
+        assert data[name]['id'].to_s == id.to_s,
+          "Tried to find #{name} with id #{id}, but got #{name} with id #{data[name]['id']}."
+      end
 
       _create_model(klass, data[name])
     end
@@ -112,6 +116,45 @@ module RubyJsonApiClient
 
       extract_many(klass, response, plural)
         .select { |record| idMap[record.id] }
+    end
+
+    def extract_single_relationship(parent, name, options, response)
+      plural = ActiveSupport::Inflector.pluralize(name)
+      data = transform(response)
+      meta = parent.meta || {}
+      meta_links = meta[:links]
+      meta_data = meta[:data]
+
+      if meta_links && meta_links[name.to_s]
+        extract_single_relationship_from_links(parent, name, options, meta_links[name.to_s])
+
+      elsif data[plural.to_s] && meta_data && meta_data["#{name}_id"]
+        extract_single_relationship_from_sideload(parent, name, options, response)
+
+      else
+        nil # nothing found, return nil object
+
+      end
+    end
+
+    def extract_single_relationship_from_links(parent, name, options, url)
+      klass_name = options[:class_name] || ActiveSupport::Inflector.classify(name)
+      klass = ActiveSupport::Inflector.constantize(klass_name)
+      meta = parent.meta || {}
+      meta_data = meta[:data] || {}
+
+      store.load_single(klass, meta_data["#{name}_id"], url)
+    end
+
+    def extract_single_relationship_from_sideload(parent, name, options, response)
+      plural = ActiveSupport::Inflector.pluralize(name)
+      klass_name = options[:class_name] || ActiveSupport::Inflector.classify(name)
+      klass = ActiveSupport::Inflector.constantize(klass_name)
+      meta_data = parent.meta[:data]
+      id = meta_data["#{name}_id"]
+
+      extract_many(klass, response, plural)
+        .detect { |record| record.id == id }
     end
   end
 end
