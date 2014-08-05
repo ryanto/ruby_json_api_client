@@ -15,15 +15,6 @@ describe "AMS find single" do
       RubyJsonApiClient::Store.default(:ams)
     end
 
-    class Person < RubyJsonApiClient::Base
-      field :firstname
-      field :lastname
-
-      def full_name
-        "#{firstname} #{lastname}"
-      end
-    end
-
     context "it exists" do
       before(:each) do
         response = {

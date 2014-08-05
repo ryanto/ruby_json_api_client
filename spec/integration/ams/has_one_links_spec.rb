@@ -12,21 +12,6 @@ describe "AMS load has_one linked record" do
     RubyJsonApiClient::Store.default(:ams)
   end
 
-  class Person < RubyJsonApiClient::Base
-    field :firstname
-    field :lastname
-
-    has_one :item
-
-    def full_name
-      "#{firstname} #{lastname}"
-    end
-  end
-
-  class Item < RubyJsonApiClient::Base
-    field :name
-  end
-
   before(:each) do
     person_response = {
       person: {

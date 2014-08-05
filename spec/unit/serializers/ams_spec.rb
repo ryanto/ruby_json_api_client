@@ -3,22 +3,53 @@ require 'spec_helper'
 describe RubyJsonApiClient::AmsSerializer do
   let(:serializer) { RubyJsonApiClient::AmsSerializer.new }
 
-  class Person < RubyJsonApiClient::Base
-    field :name
-  end
-
-  class Item < RubyJsonApiClient::Base
-    field :name
-  end
-
-  class CellPhone < RubyJsonApiClient::Base
-    field :number
-  end
-
   describe :transform do
-    let(:json) { "{\"testing\":true, \"name\":\"ryan\"}" }
+    let(:json) { "{\"testing\":true, \"firstname\":\"ryan\"}" }
     subject { serializer.transform(json)["testing"] }
     it { should eql(true) }
+  end
+
+  describe :to_json do
+    context "using fields" do
+      subject { serializer.to_json(Person.new(firstname: 'ryan')) }
+      it do
+        should eq({ person: {
+          firstname: 'ryan',
+          lastname: nil
+        }}.to_json)
+      end
+    end
+
+    context "using a persisted model" do
+      subject { serializer.to_json(Person.new(id: 1, firstname: 'ryan')) }
+      it do
+        eq({ person: {
+          id: 1,
+          firstname: 'ryan',
+          lastname: nil
+        }}).to_json
+      end
+    end
+
+    context "using a has one relationship" do
+      subject do
+        person = Person.new(
+          id: 1,
+          firstname: 'ryan'
+        )
+
+        person.item = Item.new(id: 2)
+        serializer.to_json(person)
+      end
+
+      it do
+        eq({ person: {
+          id: 1,
+          firstname: 'ryan',
+          item_id: 2
+        }}).to_json
+      end
+    end
   end
 
   describe :extract_single do
@@ -26,17 +57,17 @@ describe RubyJsonApiClient::AmsSerializer do
       subject { ->{ serializer.extract_single(Person, 1, json) } }
 
       context "no json root key exists" do
-        let(:json) { "{\"name\":\"ryan\"}" }
+        let(:json) { "{\"firstname\":\"ryan\"}" }
         it { should raise_error }
       end
 
       context "no id" do
-        let(:json) { "{\"person\": { \"name\":\"ryan\" } }" }
+        let(:json) { "{\"person\": { \"firstname\":\"ryan\" } }" }
         it { should raise_error }
       end
 
       context "the id returned is not the id we are looking for" do
-        let(:json) { "{\"person\": { \"id\": 2, \"name\":\"ryan\" } }" }
+        let(:json) { "{\"person\": { \"id\": 2, \"firstname\":\"ryan\" } }" }
         it { should raise_error }
       end
     end
@@ -45,15 +76,15 @@ describe RubyJsonApiClient::AmsSerializer do
       subject { serializer.extract_single(Person, 1, json) }
 
       context "string ids" do
-        let(:json) { "{\"person\": { \"id\": \"1\", \"name\":\"ryan\" } }" }
+        let(:json) { "{\"person\": { \"id\": \"1\", \"firstname\":\"ryan\" } }" }
         it { should be_instance_of(Person) }
       end
 
       context "attributes that are defined" do
-        let(:json) { "{\"person\": { \"id\": \"1\", \"name\":\"ryan\" } }" }
+        let(:json) { "{\"person\": { \"id\": \"1\", \"firstname\":\"ryan\" } }" }
         it { should be_instance_of(Person) }
-        it { should respond_to(:name) }
-        its(:name) { should eq('ryan') }
+        it { should respond_to(:firstname) }
+        its(:firstname) { should eq('ryan') }
       end
 
       context "attributes that are not defined" do
@@ -79,12 +110,12 @@ describe RubyJsonApiClient::AmsSerializer do
       subject { ->{ serializer.extract_many(Person, json) } }
 
       context "there is no plural key in the response" do
-        let(:json) { "[{ \"id\": 1, \"name\": \"ryan\" }]" }
+        let(:json) { "[{ \"id\": 1, \"firstname\": \"ryan\" }]" }
         it { should raise_error }
       end
 
       context "there is no array of data" do
-        let(:json) { "{ \"id\": 1, \"name\": \"ryan\" }" }
+        let(:json) { "{ \"id\": 1, \"firstname\": \"ryan\" }" }
         it { should raise_error }
       end
     end
@@ -95,14 +126,14 @@ describe RubyJsonApiClient::AmsSerializer do
 
       context "multiple records" do
         let(:json) do
-          "{ \"people\": [{ \"id\": 1, \"name\": \"ryan\" }, { \"id\": 2, \"name\": \"ryan2\" }] }"
+          "{ \"people\": [{ \"id\": 1, \"firstname\": \"ryan\" }, { \"id\": 2, \"firstname\": \"ryan2\" }] }"
         end
 
         it { should have(2).items }
 
         it "should serialize one of the records" do
-          expect(collection.first).to respond_to(:name)
-          expect(collection.first.name).to eq('ryan')
+          expect(collection.first).to respond_to(:firstname)
+          expect(collection.first.firstname).to eq('ryan')
         end
       end
     end

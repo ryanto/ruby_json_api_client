@@ -4,36 +4,32 @@ describe RubyJsonApiClient do
   let(:serializer) { RubyJsonApiClient::JsonApiSerializer.new }
 
   describe :transform do
-    let(:json) { "{\"testing\":true, \"name\":\"ryan\"}" }
+    let(:json) { "{\"testing\":true, \"firstname\":\"ryan\"}" }
     subject { serializer.transform(json)["testing"] }
     it { should eql(true) }
   end
 
   describe :extract_single do
-    class Person < RubyJsonApiClient::Base
-      field :name
-    end
-
     context "will error when" do
       subject { ->{ serializer.extract_single(Person, 1, json) } }
 
       context "no json root key exists" do
-        let(:json) { "{\"name\":\"ryan\"}" }
+        let(:json) { "{\"firstname\":\"ryan\"}" }
         it { should raise_error }
       end
 
       context "single resource is not a collection" do
-        let(:json) { "{ \"people\": { \"name\":\"ryan\" } }" }
+        let(:json) { "{ \"people\": { \"firstname\":\"ryan\" } }" }
         it { should raise_error }
       end
 
       context "no id" do
-        let(:json) { "{\"people\": [{ \"name\":\"ryan\" }] }" }
+        let(:json) { "{\"people\": [{ \"firstname\":\"ryan\" }] }" }
         it { should raise_error }
       end
 
       context "the id returned is not the id we are looking for" do
-        let(:json) { "{\"people\": [{ \"id\": 2, \"name\":\"ryan\" }] }" }
+        let(:json) { "{\"people\": [{ \"id\": 2, \"firstname\":\"ryan\" }] }" }
         it { should raise_error }
       end
     end
@@ -42,19 +38,19 @@ describe RubyJsonApiClient do
       subject { serializer.extract_single(Person, 1, json) }
 
       context "string ids" do
-        let(:json) { "{\"people\": [{ \"id\": \"1\", \"name\":\"ryan\" }] }" }
+        let(:json) { "{\"people\": [{ \"id\": \"1\", \"firstname\":\"ryan\" }] }" }
         it { should be_instance_of(Person) }
       end
 
       context "attributes that are defined" do
-        let(:json) { "{\"people\": [{ \"id\": \"1\", \"name\":\"ryan\" }] }" }
+        let(:json) { "{\"people\": [{ \"id\": \"1\", \"firstname\":\"ryan\" }] }" }
         let(:model) { subject }
 
         it { should be_instance_of(Person) }
-        it { should respond_to(:name) }
+        it { should respond_to(:firstname) }
 
         it "should set the right values" do
-          expect(model.name).to eq('ryan')
+          expect(model.firstname).to eq('ryan')
         end
       end
 
@@ -87,12 +83,12 @@ describe RubyJsonApiClient do
       subject { ->{ serializer.extract_many(Person, json) } }
 
       context "there is no plural key in the response" do
-        let(:json) { "[{ \"id\": 1, \"name\": \"ryan\" }]" }
+        let(:json) { "[{ \"id\": 1, \"firstname\": \"ryan\" }]" }
         it { should raise_error }
       end
 
       context "there is no array of data" do
-        let(:json) { "{ \"id\": 1, \"name\": \"ryan\" }" }
+        let(:json) { "{ \"id\": 1, \"firstname\": \"ryan\" }" }
         it { should raise_error }
       end
     end
@@ -103,14 +99,14 @@ describe RubyJsonApiClient do
 
       context "multiple records" do
         let(:json) do
-          "{ \"people\": [{ \"id\": 1, \"name\": \"ryan\" }, { \"id\": 2, \"name\": \"ryan2\" }] }"
+          "{ \"people\": [{ \"id\": 1, \"firstname\": \"ryan\" }, { \"id\": 2, \"firstname\": \"ryan2\" }] }"
         end
 
         it { should have(2).items }
 
         it "should serialize one of the records" do
-          expect(collection.first).to respond_to(:name)
-          expect(collection.first.name).to eq('ryan')
+          expect(collection.first).to respond_to(:firstname)
+          expect(collection.first.firstname).to eq('ryan')
         end
       end
     end

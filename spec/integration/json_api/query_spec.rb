@@ -13,15 +13,6 @@ describe "JSON API query records" do
       RubyJsonApiClient::Store.default(:json_api)
     end
 
-    class Person < RubyJsonApiClient::Base
-      field :firstname
-      field :lastname
-
-      def full_name
-        "#{firstname} #{lastname}"
-      end
-    end
-
     context "that exists" do
       before(:each) do
         response = {

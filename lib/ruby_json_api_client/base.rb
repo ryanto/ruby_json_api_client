@@ -30,11 +30,9 @@ module RubyJsonApiClient
     attr_accessor :meta
     attr_accessor :__origin__
 
-    def self.belongs_to(name)
-
-    end
-
     def self.has_many(name, options = {})
+      @_has_many_relationships ||= []
+      @_has_many_relationships << name
       define_method(name) do
         # make cachable
         RubyJsonApiClient::Store
@@ -43,13 +41,37 @@ module RubyJsonApiClient
       end
     end
 
+    def self.has_many_relationships
+      @_has_many_relationships
+    end
+
     def self.has_one(name, options = {})
       define_method(name) do
-        # make cachable
-        RubyJsonApiClient::Store
-          .instance
-          .find_single_relationship(self, name, options)
+        @_loaded_has_ones ||= {}
+
+        if @_loaded_has_ones[name].nil?
+          result = RubyJsonApiClient::Store
+            .instance
+            .find_single_relationship(self, name, options)
+
+          @_loaded_has_ones[name] = result
+        end
+
+        @_loaded_has_ones[name]
       end
+
+      define_method("#{name}=") do |related|
+        @_loaded_has_ones[name] ||= {}
+        @_loaded_has_ones[name] = related
+
+        require 'pry'
+        binding.pry
+
+      end
+    end
+
+    def loaded_has_ones
+      @_loaded_has_ones || {}
     end
 
     def self.find(id)

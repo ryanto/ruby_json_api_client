@@ -2,15 +2,19 @@ require 'spec_helper'
 
 describe RubyJsonApiClient::Base do
   class Person < RubyJsonApiClient::Base
-    field :name, :string
-    validates :name, presence: true
+    field :firstname, :string
+    validates :firstname, presence: true
+  end
+
+  class Thing < RubyJsonApiClient::Base
+    identifier :uuid
   end
 
   describe :field do
     it "should setup attributes for the model" do
       person = Person.new
-      person.name = 'ryan'
-      expect(person.name).to eq 'ryan'
+      person.firstname = 'ryan'
+      expect(person.firstname).to eq 'ryan'
     end
 
     context "that has validations" do
@@ -20,7 +24,7 @@ describe RubyJsonApiClient::Base do
       end
 
       context "that pass" do
-        subject { Person.new(name: 'ryan').valid? }
+        subject { Person.new(firstname: 'ryan').valid? }
         it { should eq(true) }
       end
     end
@@ -32,9 +36,6 @@ describe RubyJsonApiClient::Base do
     end
 
     it "should be able to change the identifier" do
-      class Thing < RubyJsonApiClient::Base
-        identifier :uuid
-      end
 
       expect(Thing._identifier).to eq :uuid
     end

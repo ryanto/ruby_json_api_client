@@ -12,22 +12,6 @@ describe "AMS load has_many sideloaded records" do
     RubyJsonApiClient::Store.default(:ams)
   end
 
-  class Person < RubyJsonApiClient::Base
-    field :firstname
-    field :lastname
-
-    has_many :items
-    has_many :other_items, class_name: 'Item'
-
-    def full_name
-      "#{firstname} #{lastname}"
-    end
-  end
-
-  class Item < RubyJsonApiClient::Base
-    field :name
-  end
-
   context "that are loaded" do
     before(:each) do
       response = {

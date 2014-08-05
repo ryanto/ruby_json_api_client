@@ -9,6 +9,33 @@ module RubyJsonApiClient
       JSON.parse(response)
     end
 
+    def to_json(model)
+      key = model.class.to_s.underscore.downcase
+      data = {}
+      data[key] = {}
+
+      if model.persisted?
+        data[key][:id] = model.id
+      end
+
+      # conert fields to json
+      model.class.fields.reduce(data[key]) do |result, field|
+        result[field] = model.send(field)
+        result
+      end
+
+      # convert has one relationships to json
+      relationships = model.loaded_has_ones || {}
+      relationships.reduce(data[key]) do |result, (name, relationship)|
+        if relationship.id
+          result["#{name}_id"] = relationship.id
+        end
+        result
+      end
+
+      JSON::generate(data)
+    end
+
     def assert(test, failure_message)
       raise failure_message if !test
     end
