@@ -23,11 +23,11 @@ describe RubyJsonApiClient::AmsSerializer do
     context "using a persisted model" do
       subject { serializer.to_json(Person.new(id: 1, firstname: 'ryan')) }
       it do
-        eq({ person: {
+        should eq({ person: {
           id: 1,
           firstname: 'ryan',
           lastname: nil
-        }}).to_json
+        } }.to_json)
       end
     end
 
@@ -35,7 +35,8 @@ describe RubyJsonApiClient::AmsSerializer do
       subject do
         person = Person.new(
           id: 1,
-          firstname: 'ryan'
+          firstname: 'ryan',
+          lastname: nil
         )
 
         person.item = Item.new(id: 2)
@@ -43,11 +44,12 @@ describe RubyJsonApiClient::AmsSerializer do
       end
 
       it do
-        eq({ person: {
+        should eq({ person: {
           id: 1,
           firstname: 'ryan',
+          lastname: nil,
           item_id: 2
-        }}).to_json
+        } }.to_json)
       end
     end
   end

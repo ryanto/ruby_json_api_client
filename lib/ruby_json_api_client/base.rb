@@ -60,13 +60,9 @@ module RubyJsonApiClient
         @_loaded_has_ones[name]
       end
 
-      define_method("#{name}=") do |related|
-        @_loaded_has_ones[name] ||= {}
+      define_method("#{name}=".to_sym) do |related|
+        @_loaded_has_ones ||= {}
         @_loaded_has_ones[name] = related
-
-        require 'pry'
-        binding.pry
-
       end
     end
 
