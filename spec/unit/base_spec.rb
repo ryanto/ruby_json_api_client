@@ -6,7 +6,6 @@ describe RubyJsonApiClient::Base do
     validates :firstname, presence: true
   end
 
-
   describe :field do
     it "should setup attributes for the model" do
       person = Person.new
@@ -24,6 +23,18 @@ describe RubyJsonApiClient::Base do
         subject { Person.new(firstname: 'ryan').valid? }
         it { should eq(true) }
       end
+    end
+  end
+
+  describe :has_field? do
+    context "a class with no fields" do
+      subject { Nothing.has_field?(:nope) }
+      it { should eq(false) }
+    end
+
+    context "a class with fields that has the field" do
+      subject { Item.has_field?(:name) }
+      it { should eq(true) }
     end
   end
 

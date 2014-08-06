@@ -24,3 +24,6 @@ end
 class Thing < RubyJsonApiClient::Base
   identifier :uuid
 end
+
+class Nothing < RubyJsonApiClient::Base
+end

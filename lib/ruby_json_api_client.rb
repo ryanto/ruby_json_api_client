@@ -1,5 +1,3 @@
-require 'active_model'
-
 module RubyJsonApiClient
 end
 

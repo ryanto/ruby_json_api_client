@@ -9,6 +9,7 @@ module RubyJsonApiClient
     attr_accessor :namespace
     attr_accessor :port
     attr_accessor :url_root
+    attr_accessor :required_query_params
 
     def initialize(options = {})
       options.each do |(field, value)|
@@ -28,6 +29,21 @@ module RubyJsonApiClient
       name = klass.name
       plural = ActiveSupport::Inflector.pluralize(name)
       "#{@namespace}/#{plural.underscore}"
+    end
+
+    def accept_header
+      'application/json'
+    end
+
+    def user_agent
+      'RubyJsonApiClient'
+    end
+
+    def headers
+      {
+        accept: accept_header,
+        user_user: user_agent
+      }
     end
 
     def find(klass, id)
@@ -70,10 +86,17 @@ module RubyJsonApiClient
       proto = uri.scheme || (@secure ? "https" : "http")
       hostname = uri.host || @hostname
       path = uri.path
-      query_params = (uri.query_values || {}).merge(params)
+      query_params = (required_query_params || {})
+        .merge(uri.query_values || {})
+        .merge(params)
 
       conn = Faraday.new("#{proto}://#{hostname}")
-      response = conn.send(method, path, query_params)
+
+      block = proc do |req|
+        req.headers = headers
+      end
+
+      response = conn.send(method, path, query_params, &block)
       [response.status, response.headers, response.body]
     end
   end

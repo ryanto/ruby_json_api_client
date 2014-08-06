@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 module RubyJsonApiClient
   class Store
     def self.register_adapter(name, klass = nil, options = {})

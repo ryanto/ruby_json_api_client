@@ -1,3 +1,5 @@
+require 'active_model'
+
 module RubyJsonApiClient
   class Base
     include ActiveModel::Model
@@ -14,7 +16,7 @@ module RubyJsonApiClient
     end
 
     def self.has_field?(name)
-      (@_fields | [_identifier]).include?(name)
+      (fields | [_identifier]).include?(name)
     end
 
     def self.identifier(name)
