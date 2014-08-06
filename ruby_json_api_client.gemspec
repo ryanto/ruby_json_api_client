@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = RubyJsonApiClient::VERSION
   spec.authors       = ["Ryan Toronto"]
   spec.email         = ["ryanto@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{API client for activemodel instances}
+  spec.description   = %q{API client for activemodel instances}
   spec.homepage      = ""
   spec.license       = "MIT"
 
