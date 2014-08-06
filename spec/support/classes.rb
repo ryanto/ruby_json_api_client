@@ -20,3 +20,7 @@ end
 class CellPhone < RubyJsonApiClient::Base
   field :number
 end
+
+class Thing < RubyJsonApiClient::Base
+  identifier :uuid
+end

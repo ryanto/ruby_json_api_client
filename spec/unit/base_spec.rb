@@ -6,9 +6,6 @@ describe RubyJsonApiClient::Base do
     validates :firstname, presence: true
   end
 
-  class Thing < RubyJsonApiClient::Base
-    identifier :uuid
-  end
 
   describe :field do
     it "should setup attributes for the model" do

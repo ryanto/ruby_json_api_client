@@ -9,15 +9,6 @@ describe RubyJsonApiClient::RestAdapter do
     )
   end
 
-  class Person < RubyJsonApiClient::Base
-  end
-
-  class Thing < RubyJsonApiClient::Base
-  end
-
-  class CellPhone < RubyJsonApiClient::Base
-  end
-
   describe :initialize do
     subject { adapter }
     its(:hostname) { should eq('www.example.com') }
