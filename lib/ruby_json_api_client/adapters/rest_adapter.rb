@@ -85,12 +85,13 @@ module RubyJsonApiClient
 
       proto = uri.scheme || (@secure ? "https" : "http")
       hostname = uri.host || @hostname
+      port = uri.port || @port || (@secure ? 443 : 80)
       path = uri.path
       query_params = (required_query_params || {})
         .merge(uri.query_values || {})
         .merge(params)
 
-      conn = Faraday.new("#{proto}://#{hostname}")
+      conn = Faraday.new("#{proto}://#{hostname}:#{port}")
 
       block = proc do |req|
         req.headers = headers

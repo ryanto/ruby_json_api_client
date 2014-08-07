@@ -68,4 +68,32 @@ describe RubyJsonApiClient::Base do
       expect(Person.new.persisted?).to eql(false)
     end
   end
+
+  describe :== do
+    context "two objects of different classes" do
+      subject { Person.new(id: 1) == Item.new(id: 1) }
+      it { should eq(false) }
+    end
+
+    context "two objects of the same class but different ids" do
+      subject { Person.new(id: 1) == Person.new(id: 2) }
+      it { should eq(false) }
+    end
+
+    context "two objects with the same klass and id" do
+      subject { Person.new(id: 1) == Person.new(id: 1) }
+      it { should eq(true) }
+    end
+
+    context "the same instance" do
+      let(:person) { Person.new(id: 1) }
+      subject { person == person }
+      it { should eq(true) }
+    end
+
+    context "two objects with non standard identifiers" do
+      subject { Thing.new(uuid: 'x') == Thing.new(uuid: 'x') }
+      it { should eq(true) }
+    end
+  end
 end
