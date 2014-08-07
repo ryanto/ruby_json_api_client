@@ -6,6 +6,10 @@ module RubyJsonApiClient
     include ActiveModel::AttributeMethods
     include ActiveModel::Serialization
 
+    if defined?(ActiveModel::SerializerSupport)
+      include ActiveModel::SerializerSupport
+    end
+
     def self.field(name, type = :string)
       @_fields ||= []
       @_fields << name
