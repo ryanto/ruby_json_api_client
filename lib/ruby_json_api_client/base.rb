@@ -11,17 +11,16 @@ module RubyJsonApiClient
     end
 
     def self.field(name, type = :string)
-      @_fields ||= []
-      @_fields << name
+      fields << name
       attr_accessor name
     end
 
     def self.fields
-      @_fields || []
+      @_fields ||= Set.new [_identifier]
     end
 
     def self.has_field?(name)
-      (fields | [_identifier]).include?(name)
+      fields.include?(name)
     end
 
     def self.identifier(name)
@@ -41,7 +40,6 @@ module RubyJsonApiClient
       @_has_many_relationships ||= []
       @_has_many_relationships << name
       define_method(name) do
-        # make cachable
         RubyJsonApiClient::Store
           .instance
           .find_many_relationship(self, name, options)
