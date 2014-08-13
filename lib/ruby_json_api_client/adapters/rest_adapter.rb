@@ -2,8 +2,6 @@ require 'faraday'
 require "addressable/uri"
 require 'active_support'
 
-require 'typhoeus/adapters/faraday'
-
 module RubyJsonApiClient
   class RestAdapter
     attr_accessor :secure
@@ -11,9 +9,14 @@ module RubyJsonApiClient
     attr_accessor :namespace
     attr_accessor :port
     attr_accessor :url_root
+    attr_accessor :http_client
     attr_accessor :required_query_params
 
     def initialize(options = {})
+      if options[:http_client].nil?
+        options[:http_client] = :net_http
+      end
+
       options.each do |(field, value)|
         send("#{field}=", value)
       end
@@ -97,9 +100,8 @@ module RubyJsonApiClient
       conn = Faraday.new("#{proto}://#{hostname}:#{port}", {
         headers: headers
       }) do |f|
-        f.adapter :typhoeus
+        f.adapter @http_client
       end
-
 
       response = conn.send(method, path, query_params)
       [response.status, response.headers, response.body]

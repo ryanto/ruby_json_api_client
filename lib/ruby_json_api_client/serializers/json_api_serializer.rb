@@ -5,6 +5,9 @@ module RubyJsonApiClient
   class JsonApiSerializer
     attr_accessor :store
 
+    def initialize(options = {})
+    end
+
     def transform(response)
       JSON.parse(response)
     end

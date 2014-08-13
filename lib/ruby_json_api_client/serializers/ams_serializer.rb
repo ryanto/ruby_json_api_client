@@ -4,19 +4,27 @@ require 'active_support'
 module RubyJsonApiClient
   class AmsSerializer
     attr_accessor :store
+    attr_accessor :json_parsing_method
+
+    def initialize(options = {})
+      if options[:json_parsing_method].nil?
+        options[:json_parsing_method] = JSON.method(:parse)
+      end
+
+      options.each do |(field, value)|
+        send("#{field}=", value)
+      end
+    end
 
     def transform(response)
-      JSON.parse(response)
+      @json_parsing_method.call(response)
     end
 
     def to_json(model)
       key = model.class.to_s.underscore.downcase
+      id_field = model.class._identifier
       data = {}
       data[key] = {}
-
-      if model.persisted?
-        data[key][:id] = model.id
-      end
 
       # conert fields to json
       model.class.fields.reduce(data[key]) do |result, field|
@@ -31,6 +39,10 @@ module RubyJsonApiClient
           result["#{name}_id"] = relationship.id
         end
         result
+      end
+
+      if !model.persisted?
+        data[key].delete(id_field) if data[key].has_key?(id_field)
       end
 
       JSON::generate(data)

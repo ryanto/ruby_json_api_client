@@ -15,8 +15,7 @@ module RubyJsonApiClient
       @adapters[name] = OpenStruct.new({ klass: klass, options: options })
     end
 
-
-    def self.register_serializer(name, klass = nil)
+    def self.register_serializer(name, klass = nil, options = {})
       @serializers ||= {}
 
       if klass.nil?
@@ -24,13 +23,13 @@ module RubyJsonApiClient
         klass = Kernel.const_get("RubyJsonApiClient::#{class_name}Serializer")
       end
 
-      @serializers[name] = OpenStruct.new({ klass: klass })
+      @serializers[name] = OpenStruct.new({ klass: klass, options: options })
     end
 
     def self.get_serializer(name)
       @serializers ||= {}
       if @serializers[name]
-        @serializers[name].klass.new
+        @serializers[name].klass.new(@serializers[name].options)
       end
     end
 
