@@ -39,10 +39,19 @@ module RubyJsonApiClient
     def self.has_many(name, options = {})
       @_has_many_relationships ||= []
       @_has_many_relationships << name
+
       define_method(name) do
-        RubyJsonApiClient::Store
-          .instance
-          .find_many_relationship(self, name, options)
+        @_loaded_has_manys ||= {}
+
+        if @_loaded_has_manys[name].nil?
+          result = RubyJsonApiClient::Store
+            .instance
+            .find_many_relationship(self, name, options)
+
+          @_loaded_has_manys[name] = result
+        end
+
+        @_loaded_has_manys[name]
       end
     end
 
