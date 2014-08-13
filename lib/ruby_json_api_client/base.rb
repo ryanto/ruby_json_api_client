@@ -104,16 +104,13 @@ module RubyJsonApiClient
       RubyJsonApiClient::Store.instance.reload(self)
     end
 
-    def links
-      store.find(self.class._identifier).__data__
-    end
-
     def ==(other)
       klass_match = (self.class == other.class)
       ids_match = (send(self.class._identifier) == other.send(other.class._identifier))
 
       klass_match && ids_match
     end
-
+    alias_method :eql?, :==
+    alias_method :equal?, :==
   end
 end
