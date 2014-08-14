@@ -18,9 +18,13 @@ module RubyJsonApiClient
     def self.register_serializer(name, klass = nil, options = {})
       @serializers ||= {}
 
-      if klass.nil?
+      # allow for 2 arguments (automatically figure out class if so)
+      if !klass.is_a?(Class)
+        # klass is options. autoamtically figure out klass and set options
+        temp = klass || options
         class_name = name.to_s.camelize
         klass = Kernel.const_get("RubyJsonApiClient::#{class_name}Serializer")
+        options = temp
       end
 
       @serializers[name] = OpenStruct.new({ klass: klass, options: options })
