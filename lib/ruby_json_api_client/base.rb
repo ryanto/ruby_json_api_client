@@ -104,6 +104,17 @@ module RubyJsonApiClient
       RubyJsonApiClient::Store.instance.reload(self)
     end
 
+    def save
+      RubyJsonApiClient::Store.instance.save(self)
+    end
+
+    def update_attributes(data)
+      data.each do |(key, value)|
+        self.send("#{key}=", value)
+      end
+      save
+    end
+
     def ==(other)
       klass_match = (self.class == other.class)
       ids_match = (send(self.class._identifier) == other.send(other.class._identifier))

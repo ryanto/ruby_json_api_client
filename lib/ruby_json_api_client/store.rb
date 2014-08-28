@@ -157,6 +157,27 @@ module RubyJsonApiClient
       merge(model, new_model)
     end
 
+    def save(model)
+      klass = model.class
+      adapter = adapter_for_class(klass)
+      serializer = serializer_for_class(klass)
+      json = serializer.to_json(model)
+
+      if model.persisted?
+        response = adapter.update(model, json)
+      else
+        response = adapter.create(model, json)
+      end
+
+      # convert response into model
+      # can we just use serializer to load data into model?
+      new_model = serializer.extract_single(klass, model.id, response).tap do |m|
+        m.__origin__ = response
+      end
+
+      merge(model, new_model)
+    end
+
     def merge(into, from)
       into.__origin__ = from.__origin__
       into.meta = from.meta

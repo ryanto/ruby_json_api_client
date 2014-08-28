@@ -73,18 +73,33 @@ module RubyJsonApiClient
       end
     end
 
+    def create(model, json)
+
+    end
+
+    def update(model, json)
+      url = single_path(model.klass, { id: model.id })
+      status, _, body = http_request(:put, url, {})
+
+      if status >= 200 && status <= 299
+        body
+      else
+        raise "Could not put to #{url}"
+      end
+    end
+
     def get(url)
       status, _, body = http_request(:get, url, {})
 
       if status >= 200 && status <= 299
         body
       else
-        raise "Could not query #{path}"
+        raise "Could not query #{url}"
       end
     end
 
-    protected
 
+    protected
 
     def http_request(method, url, params)
       uri = Addressable::URI.parse(url)
