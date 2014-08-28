@@ -141,6 +141,7 @@ the adapter guide based on which adapter you are using.
 * Write AMS adapter docs
 * Write docs for custom adapter
 * Auto figure out default serializer from registered adapter(s)
+* has one should accept field_id = 123. Post.find(1).author_id = 5
 
 #### AMS
 

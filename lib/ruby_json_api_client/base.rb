@@ -1,4 +1,5 @@
 require 'active_model'
+require 'active_support'
 
 module RubyJsonApiClient
   class Base
@@ -77,6 +78,13 @@ module RubyJsonApiClient
       define_method("#{name}=".to_sym) do |related|
         @_loaded_has_ones ||= {}
         @_loaded_has_ones[name] = related
+      end
+
+      define_method("#{name}_id=".to_sym) do |related_id|
+        klass_name = options[:class_name] || ActiveSupport::Inflector.classify(name)
+        klass = ActiveSupport::Inflector.constantize(klass_name)
+        @_loaded_has_ones ||= {}
+        @_loaded_has_ones[name] = klass.new(id: related_id)
       end
     end
 
