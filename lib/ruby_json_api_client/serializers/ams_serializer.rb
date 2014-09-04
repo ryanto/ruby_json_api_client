@@ -20,7 +20,7 @@ module RubyJsonApiClient
       @json_parsing_method.call(response)
     end
 
-    def to_json(model)
+    def to_data(model)
       key = model.class.to_s.underscore.downcase
       id_field = model.class._identifier
       data = {}
@@ -45,7 +45,11 @@ module RubyJsonApiClient
         data[key].delete(id_field) if data[key].has_key?(id_field)
       end
 
-      JSON::generate(data)
+      data
+    end
+
+    def to_json(model)
+      JSON::generate(to_data(model))
     end
 
     def assert(test, failure_message)

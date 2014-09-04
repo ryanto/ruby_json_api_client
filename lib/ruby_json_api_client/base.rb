@@ -104,6 +104,10 @@ module RubyJsonApiClient
       RubyJsonApiClient::Store.instance.query(self, params)
     end
 
+    def self.create(params)
+      new(params).tap(&:save)
+    end
+
     def persisted?
       !!send(self.class._identifier)
     end
@@ -118,9 +122,13 @@ module RubyJsonApiClient
 
     def update_attributes(data)
       data.each do |(key, value)|
-        self.send("#{key}=", value)
+        send("#{key}=", value)
       end
       save
+    end
+
+    def destroy
+      RubyJsonApiClient::Store.instance.delete(self)
     end
 
     def ==(other)

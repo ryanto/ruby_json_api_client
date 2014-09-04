@@ -73,18 +73,36 @@ module RubyJsonApiClient
       end
     end
 
-    def create(model, json)
+    def create(model, data)
+      url = collection_path(model.class, {})
+      status, _, body = http_request(:post, url, data)
 
+      if status >= 200 && status <= 299
+        body
+      else
+        raise "Could not post to #{url}"
+      end
     end
 
-    def update(model, json)
-      url = single_path(model.klass, { id: model.id })
-      status, _, body = http_request(:put, url, {})
+    def update(model, data)
+      url = single_path(model.class, { id: model.id })
+      status, _, body = http_request(:put, url, data)
 
       if status >= 200 && status <= 299
         body
       else
         raise "Could not put to #{url}"
+      end
+    end
+
+    def delete(model)
+      url = single_path(model.class, { id: model.id })
+      status, _, body = http_request(:delete, url, {})
+
+      if status >= 200 && status <= 299
+        body
+      else
+        raise "Could not delete to #{url}"
       end
     end
 
@@ -97,7 +115,6 @@ module RubyJsonApiClient
         raise "Could not query #{url}"
       end
     end
-
 
     protected
 
@@ -112,9 +129,12 @@ module RubyJsonApiClient
         .merge(uri.query_values || {})
         .merge(params)
 
+
+
       conn = Faraday.new("#{proto}://#{hostname}:#{port}", {
         headers: headers
       }) do |f|
+        f.request :url_encoded
         f.adapter @http_client
       end
 

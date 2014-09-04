@@ -115,7 +115,10 @@ module RubyJsonApiClient
       response = parent.__origin__
 
       # find the relationship
-      list = serializer.extract_many_relationship(parent, name, options, response)
+      list = serializer.extract_many_relationship(parent, name, options, response).map do |model|
+        model.__origin__ = response if model.__origin__.nil?
+        model
+      end
 
       # wrap in enumerable proxy to allow reloading
       collection = RubyJsonApiClient::Collection.new(list)
@@ -131,21 +134,30 @@ module RubyJsonApiClient
 
       response = parent.__origin__
 
-      serializer.extract_single_relationship(parent, name, options, response)
+      serializer.extract_single_relationship(parent, name, options, response).tap do |model|
+        model.__origin__ = response if model.__origin__.nil?
+      end
     end
 
+    # TODO: make the 2 following functions a bit nicer
     def load_collection(klass, url)
       adapter = adapter_for_class(klass)
       serializer = serializer_for_class(klass)
       response = adapter.get(url)
-      serializer.extract_many(klass, response)
+      serializer.extract_many(klass, response).map do |model|
+        model.__origin__ = response
+        model
+      end
     end
 
+    # TODO: make nicer
     def load_single(klass, id, url)
       adapter = adapter_for_class(klass)
       serializer = serializer_for_class(klass)
       response = adapter.get(url)
-      serializer.extract_single(klass, id, response)
+      serializer.extract_single(klass, id, response).tap do |model|
+        model.__origin__ = response
+      end
     end
 
     def load(klass, data)
@@ -161,21 +173,39 @@ module RubyJsonApiClient
       klass = model.class
       adapter = adapter_for_class(klass)
       serializer = serializer_for_class(klass)
-      json = serializer.to_json(model)
+      data = serializer.to_data(model)
 
       if model.persisted?
-        response = adapter.update(model, json)
+        response = adapter.update(model, data)
       else
-        response = adapter.create(model, json)
+        response = adapter.create(model, data)
       end
 
-      # convert response into model
-      # can we just use serializer to load data into model?
-      new_model = serializer.extract_single(klass, model.id, response).tap do |m|
-        m.__origin__ = response
+      if response && response != ""
+        # convert response into model if there is one.
+        # should probably rely on adapter status (error, not changed, changed). etc
+        #
+        # TODO: can we just use serializer to load data into model?
+        new_model = serializer.extract_single(klass, model.id, response).tap do |m|
+          m.__origin__ = response
+        end
+
+        merge(model, new_model)
       end
 
-      merge(model, new_model)
+      # TODO: Handle failures
+      true
+    end
+
+    def delete(model)
+      if model.persisted?
+        klass = model.class
+        adapter = adapter_for_class(klass)
+        adapter.delete(model)
+      end
+
+      # TODO: Handle failures
+      true
     end
 
     def merge(into, from)
