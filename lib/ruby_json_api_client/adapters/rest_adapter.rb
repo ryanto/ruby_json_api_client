@@ -52,6 +52,8 @@ module RubyJsonApiClient
     end
 
     def find(klass, id)
+      raise "Cannot find nil id" if id.nil?
+
       path = single_path(klass, id: id)
       status, _, body = http_request(:get, path, {})
 

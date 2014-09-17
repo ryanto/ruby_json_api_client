@@ -135,7 +135,7 @@ module RubyJsonApiClient
       response = parent.__origin__
 
       serializer.extract_single_relationship(parent, name, options, response).tap do |model|
-        model.__origin__ = response if model.__origin__.nil?
+        model.__origin__ = response if model && model.__origin__.nil?
       end
     end
 
