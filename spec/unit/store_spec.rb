@@ -184,6 +184,7 @@ describe RubyJsonApiClient::Store do
 
       expect(serializer).to receive(:extract_many)
         .with(Person, "[]")
+        .and_return([])
 
       store.load_collection(Person, "http://example.com/testings")
     end
@@ -205,6 +206,7 @@ describe RubyJsonApiClient::Store do
 
       expect(serializer).to receive(:extract_single)
         .with(Person, 1, "{}")
+        .and_return(OpenStruct.new)
 
       store.load_single(Person, 1, "http://example.com/testings/1")
     end

@@ -1,5 +1,7 @@
 require 'faraday'
+require 'faraday_middleware'
 require "addressable/uri"
+require 'json'
 require 'active_support'
 
 module RubyJsonApiClient
@@ -127,16 +129,15 @@ module RubyJsonApiClient
       hostname = uri.host || @hostname
       port = uri.port || @port || (@secure ? 443 : 80)
       path = uri.path
+
       query_params = (required_query_params || {})
         .merge(uri.query_values || {})
         .merge(params)
 
-
-
       conn = Faraday.new("#{proto}://#{hostname}:#{port}", {
         headers: headers
       }) do |f|
-        f.request :url_encoded
+        f.request :json
         f.adapter @http_client
       end
 
