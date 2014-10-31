@@ -20,6 +20,17 @@ module RubyJsonApiClient
       @_fields ||= Set.new [_identifier]
     end
 
+    def self.attributes
+      fields.reduce({}) do |attributes, field|
+        attributes[field] = nil
+        attributes
+      end
+    end
+
+    def attributes
+      @attrs ||= self.class.attributes
+    end
+
     def self.has_field?(name)
       fields.include?(name)
     end

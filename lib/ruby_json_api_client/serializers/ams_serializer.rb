@@ -16,8 +16,17 @@ module RubyJsonApiClient
       end
     end
 
+    def transformed
+      @transformed ||= {}
+    end
+
     def transform(response)
-      @json_parsing_method.call(response)
+      if transformed[response].nil?
+        parsed = @json_parsing_method.call(response)
+        transformed[response] = parsed
+      end
+
+      transformed[response]
     end
 
     def to_data(model)
@@ -26,7 +35,7 @@ module RubyJsonApiClient
       data = {}
       data[key] = {}
 
-      # conert fields to json
+      # convert fields to json
       model.class.fields.reduce(data[key]) do |result, field|
         result[field] = model.send(field)
         result
