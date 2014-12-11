@@ -8,7 +8,7 @@ module RubyJsonApiClient
         # klass is options. autoamtically figure out klass and set options
         temp = klass || options
         class_name = name.to_s.camelize
-        klass = Kernel.const_get("RubyJsonApiClient::#{class_name}Adapter")
+        klass = "RubyJsonApiClient::#{class_name}Adapter".constantize
         options = temp
       end
 
@@ -23,7 +23,7 @@ module RubyJsonApiClient
         # klass is options. autoamtically figure out klass and set options
         temp = klass || options
         class_name = name.to_s.camelize
-        klass = Kernel.const_get("RubyJsonApiClient::#{class_name}Serializer")
+        klass = "RubyJsonApiClient::#{class_name}Serializer".constantize
         options = temp
       end
 
