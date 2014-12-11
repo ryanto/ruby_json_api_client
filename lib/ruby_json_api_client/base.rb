@@ -3,12 +3,24 @@ require 'active_support'
 
 module RubyJsonApiClient
   class Base
-    include ActiveModel::Model
+    extend  ActiveModel::Naming
+    extend  ActiveModel::Translation
+    include ActiveModel::Validations
+    include ActiveModel::Conversion
+
     include ActiveModel::AttributeMethods
     include ActiveModel::Serialization
 
     if defined?(ActiveModel::SerializerSupport)
       include ActiveModel::SerializerSupport
+    end
+
+    def initialize(params={})
+      params.each do |attr, value|
+        self.public_send("#{attr}=", value)
+      end if params
+
+      super()
     end
 
     def self.field(name, type = :string)

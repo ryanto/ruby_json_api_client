@@ -22,8 +22,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'faraday', '>= 0.9.0'
   spec.add_dependency 'faraday_middleware', '>= 0.9.0'
   spec.add_dependency 'addressable', '>= 2.3.6'
-  spec.add_dependency 'activemodel', '>= 4.0'
-  spec.add_dependency 'activesupport', '>= 4.0'
+  spec.add_dependency 'activemodel', '~> 3.2.0'
+  spec.add_dependency 'activesupport', '~> 3.2.0'
 
   spec.add_development_dependency "bundler", "~> 1.6"
   spec.add_development_dependency "rake"
