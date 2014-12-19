@@ -1,5 +1,5 @@
 require 'active_model'
-require 'active_support'
+require 'active_support/all'
 
 module RubyJsonApiClient
   class Base

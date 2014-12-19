@@ -82,7 +82,7 @@ module RubyJsonApiClient
       serializer = serializer_for_class(klass)
 
       response = adapter.find(klass, id)
-      serializer.extract_single(klass, id, response).tap do |model|
+      serializer.extract_single(klass, id, response).try(:tap) do |model|
         model.__origin__ = response
       end
     end

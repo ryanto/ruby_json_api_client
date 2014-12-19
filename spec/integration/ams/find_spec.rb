@@ -42,5 +42,25 @@ describe "AMS find single" do
         its(:full_name) { should eq("ryan test") }
       end
     end
+    context "it does not exists" do
+      before(:each) do
+        response = {
+        }
+
+        json = response.to_json
+
+        stub_request(:get, "https://www.example.com/testing/people/404")
+          .to_return(
+            status: 404,
+            headers: { 'Content-Length' => json.size },
+            body: json,
+          )
+      end
+
+      context "returns nil" do
+        subject { Person.find(404) }
+        it { should be_nil }
+      end
+    end
   end
 end

@@ -61,6 +61,8 @@ module RubyJsonApiClient
 
       if status >= 200 && status <= 299
         body
+      elsif status == 404
+        nil
       else
         raise "Could not find #{klass.name} with id #{id}"
       end

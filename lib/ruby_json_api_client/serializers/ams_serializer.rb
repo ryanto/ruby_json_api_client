@@ -84,6 +84,7 @@ module RubyJsonApiClient
     end
 
     def extract_single(klass, id, response)
+      return nil if response.nil?
       name = klass.to_s.underscore
       data = transform(response)
 
