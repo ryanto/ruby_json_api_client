@@ -135,6 +135,18 @@ module RubyJsonApiClient
       !!send(self.class._identifier)
     end
 
+    def new_record?
+      !persisted?
+    end
+
+    def marked_for_destruction?
+      @marked_for_destruction
+    end
+
+    def _destroy
+      marked_for_destruction?
+    end
+
     def reload
       RubyJsonApiClient::Store.instance.reload(self)
     end

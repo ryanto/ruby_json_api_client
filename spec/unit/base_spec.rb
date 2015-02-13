@@ -69,6 +69,30 @@ describe RubyJsonApiClient::Base do
     end
   end
 
+  describe :new_record? do
+    it "should not be a new record if it has an id" do
+      person = Person.new
+      person.instance_variable_set(:@id, 1)
+      expect(person.new_record?).to eql(false)
+    end
+
+    it "should be a new record if there is no id" do
+      expect(Person.new.new_record?).to eql(true)
+    end
+  end
+
+  describe :marked_for_destruction? do
+    it "should return false by default" do
+      expect(!!Person.new.marked_for_destruction?).to eql(false)
+    end
+  end
+
+  describe :_destroy do
+    it "should return false by default" do
+      expect(!!Person.new._destroy).to eql(false)
+    end
+  end
+
   describe :== do
     context "two objects of different classes" do
       subject { Person.new(id: 1) == Item.new(id: 1) }
