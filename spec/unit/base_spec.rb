@@ -120,4 +120,32 @@ describe RubyJsonApiClient::Base do
       it { should eq(true) }
     end
   end
+
+  describe :hash do
+    context "two objects of different classes" do
+      subject { Person.new(id: 1).hash == Item.new(id: 1).hash }
+      it { should eq(true) }
+    end
+
+    context "two objects of the same class but different ids" do
+      subject { Person.new(id: 1).hash == Person.new(id: 2).hash }
+      it { should eq(false) }
+    end
+
+    context "two objects with the same klass and id" do
+      subject { Person.new(id: 1).hash == Person.new(id: 1).hash }
+      it { should eq(true) }
+    end
+
+    context "the same instance" do
+      let(:person) { Person.new(id: 1) }
+      subject { person.hash == person.hash }
+      it { should eq(true) }
+    end
+
+    context "two objects with non standard identifiers" do
+      subject { Thing.new(uuid: 'x').hash == Thing.new(uuid: 'x').hash }
+      it { should eq(true) }
+    end
+  end
 end

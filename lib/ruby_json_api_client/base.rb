@@ -172,6 +172,11 @@ module RubyJsonApiClient
 
       klass_match && ids_match
     end
+
+    def hash
+      self.send(self.class._identifier).hash
+    end
+
     alias_method :eql?, :==
     alias_method :equal?, :==
   end
