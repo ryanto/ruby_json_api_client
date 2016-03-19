@@ -6,6 +6,12 @@ describe RubyJsonApiClient::Base do
     validates :firstname, presence: true
   end
 
+  describe :save do
+    it "should return false when errors" do
+      person = Person.new
+    end
+  end
+
   describe :field do
     it "should setup attributes for the model" do
       person = Person.new
@@ -22,6 +28,22 @@ describe RubyJsonApiClient::Base do
       context "that pass" do
         subject { Person.new(firstname: 'ryan').valid? }
         it { should eq(true) }
+      end
+      
+      it "should prevent creating invalid records" do
+        person = Person.create({})
+        expect(person.persisted?).to eq false
+        expect(person.errors).to be_present
+        expect(person.valid?).to eq false
+      end
+
+      it "should prevent saving invalid records" do
+        person = Person.new({})
+        ret = person.save
+        expect(ret).to eq false
+        expect(person.persisted?).to eq false
+        expect(person.errors).to be_present
+        expect(person.valid?).to eq false
       end
     end
   end

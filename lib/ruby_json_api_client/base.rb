@@ -152,7 +152,7 @@ module RubyJsonApiClient
     end
 
     def save
-      RubyJsonApiClient::Store.instance.save(self)
+      perform_validations() && RubyJsonApiClient::Store.instance.save(self)
     end
 
     def update_attributes(data)
@@ -164,6 +164,10 @@ module RubyJsonApiClient
 
     def destroy
       RubyJsonApiClient::Store.instance.delete(self)
+    end
+
+    def perform_validations(options={})
+      options[:validate] == false || valid?(options[:context])
     end
 
     def ==(other)
