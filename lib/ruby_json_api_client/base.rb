@@ -32,6 +32,13 @@ module RubyJsonApiClient
       @_fields ||= Set.new [_identifier]
     end
 
+    def self.remote_class(name=nil)
+      if name.present?
+        @_remote_class = name
+      end
+      @_remote_class || self.to_s
+    end
+
     def self.attributes
       fields.reduce({}) do |attributes, field|
         attributes[field] = nil

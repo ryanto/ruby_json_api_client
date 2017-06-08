@@ -25,7 +25,7 @@ module RubyJsonApiClient
     end
 
     def single_path(klass, params = {})
-      name = klass.name
+      name = klass.remote_class
       plural = ActiveSupport::Inflector.pluralize(name)
       path = plural.underscore
       id = params[:id]
@@ -33,7 +33,7 @@ module RubyJsonApiClient
     end
 
     def collection_path(klass, params)
-      name = klass.name
+      name = klass.remote_class
       plural = ActiveSupport::Inflector.pluralize(name)
       "#{@namespace}/#{plural.underscore}"
     end

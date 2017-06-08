@@ -85,7 +85,7 @@ module RubyJsonApiClient
 
     def extract_single(klass, id, response)
       return nil if response.nil?
-      name = klass.to_s.underscore
+      name = klass.remote_class.underscore
       data = transform(response)
 
       assert data[name],
@@ -105,7 +105,7 @@ module RubyJsonApiClient
     end
 
     def extract_many(klass, response, key = nil)
-      key = klass.to_s.underscore if key.nil?
+      key = klass.remote_class.underscore if key.nil?
       plural = ActiveSupport::Inflector.pluralize(key)
 
       data = transform(response)
