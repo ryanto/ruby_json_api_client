@@ -30,7 +30,7 @@ module RubyJsonApiClient
     end
 
     def to_data(model)
-      key = model.class.to_s.underscore.downcase
+      key = model.class.remote_class.underscore.downcase
       id_field = model.class._identifier
       data = {}
       data[key] = {}
