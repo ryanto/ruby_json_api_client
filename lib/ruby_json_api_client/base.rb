@@ -32,6 +32,13 @@ module RubyJsonApiClient
       @_fields ||= Set.new [_identifier]
     end
 
+    def self.remote_class(name=nil)
+      if name.present?
+        @_remote_class = name
+      end
+      @_remote_class || self.to_s
+    end
+
     def self.attributes
       fields.reduce({}) do |attributes, field|
         attributes[field] = nil
@@ -151,8 +158,10 @@ module RubyJsonApiClient
       RubyJsonApiClient::Store.instance.reload(self)
     end
 
-    def save
-      perform_validations() && RubyJsonApiClient::Store.instance.save(self)
+    def save(options={})
+      options.fetch(:validate, true) ?
+        perform_validations() && RubyJsonApiClient::Store.instance.save(self) :
+        RubyJsonApiClient::Store.instance.save(self)
     end
 
     def update_attributes(data)

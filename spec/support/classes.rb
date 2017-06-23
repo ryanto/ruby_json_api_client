@@ -27,3 +27,9 @@ end
 
 class Nothing < RubyJsonApiClient::Base
 end
+
+module LocalNamespace
+  class TestClass < RubyJsonApiClient::Base
+    remote_class "SomeOtherClass"
+  end
+end

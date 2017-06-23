@@ -31,6 +31,11 @@ describe RubyJsonApiClient::RestAdapter do
       subject { adapter.single_path(CellPhone, { id: 3 }) }
       it { should == "testing/cell_phones/3" }
     end
+
+    context LocalNamespace::TestClass do
+      subject { adapter.single_path(LocalNamespace::TestClass, {id: 4}) }
+      it { should == "testing/some_other_classes/4"}
+    end
   end
 
   describe :collection_path do
@@ -47,6 +52,11 @@ describe RubyJsonApiClient::RestAdapter do
     context CellPhone do
       subject { adapter.collection_path(CellPhone, {}) }
       it { should == "testing/cell_phones" }
+    end
+
+    context LocalNamespace::TestClass do
+      subject { adapter.collection_path(LocalNamespace::TestClass, {}) }
+      it { should == "testing/some_other_classes" }
     end
   end
 

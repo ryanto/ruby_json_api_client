@@ -29,7 +29,7 @@ describe RubyJsonApiClient::Base do
         subject { Person.new(firstname: 'ryan').valid? }
         it { should eq(true) }
       end
-      
+
       it "should prevent creating invalid records" do
         person = Person.create({})
         expect(person.persisted?).to eq false
@@ -46,6 +46,10 @@ describe RubyJsonApiClient::Base do
         expect(person.valid?).to eq false
       end
     end
+  end
+
+  describe :remote_class do
+
   end
 
   describe :has_field? do
