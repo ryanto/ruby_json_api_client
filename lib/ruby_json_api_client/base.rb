@@ -158,8 +158,10 @@ module RubyJsonApiClient
       RubyJsonApiClient::Store.instance.reload(self)
     end
 
-    def save
-      perform_validations() && RubyJsonApiClient::Store.instance.save(self)
+    def save(options={})
+      options.fetch(:validate, true) ?
+        perform_validations() && RubyJsonApiClient::Store.instance.save(self) :
+        RubyJsonApiClient::Store.instance.save(self)
     end
 
     def update_attributes(data)
